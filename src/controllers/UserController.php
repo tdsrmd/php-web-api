@@ -18,12 +18,12 @@ class UserController {
         $email = $data['email'];
         $gender = $data['gender'];
         $password = $data['password'];
-        $password_confirm = $data['password_confirm'];
+        $confirmPassword = $data['confirmPassword'];
         $role = isset($data['role']) ? $data['role'] : 'user';  // Varsayılan rol 'user'
 
         // Şifreler eşleşiyor mu kontrolü
-        if ($password !== $password_confirm) {
-            return ['message' => 'Passwords do not match'];
+        if ($password !== $confirmPassword) {
+            return ['message' => 'Parolalar eşleşmiyor.'];
         }
 
         // Şifreyi hash'le
@@ -36,15 +36,23 @@ class UserController {
             $token = generate_jwt($user_id, $role);
             return ['message' => 'User registered successfully', 'token' => $token];
         } catch (\Exception $e) {
-            return ['message' => 'Error: ' . $e->getMessage()];
+            if ($e->getCode() == 23000) {
+                $errorMessage = $e->getMessage();
+                if (strpos($errorMessage, 'users.email') !== false) {
+                    return ['error' => 'Email kullanımda.'];
+                }
+                return ['error' => 'Username kullanımda.'];
+            }
+
+            return ['error' => $e->getMessage()];
         }
     }
 
     public function login($data) {
-        $email = $data['email'];
+        $username = $data['username'];
         $password = $data['password'];
 
-        $user = $this->userModel->findByEmail($email);
+        $user = $this->userModel->findByUsername($username);
 
         if ($user && password_verify($password, $user['password'])) {
             $token = generate_jwt($user['id'], $user['role']);
@@ -59,7 +67,7 @@ class UserController {
                 ]
             ];
         } else {
-            return ['message' => 'Invalid email or password'];
+            return ['error' => 'Kullanıcı adı veya şifre hatalı'];
         }
     }
 }

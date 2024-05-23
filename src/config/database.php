@@ -1,12 +1,13 @@
 <?php
 
 $host = '127.0.0.1';
-$db   = 'my_database';
-$user = 'my_user';
-$pass = 'my_password';
+$db   = 'akilli_kent';
+$user = 'sedat';
+$pass = 'qweasd123';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

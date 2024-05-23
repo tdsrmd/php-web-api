@@ -20,5 +20,10 @@ class User {
         $stmt->execute([$email]);
         return $stmt->fetch();
     }
+    public function findByUsername($username) {
+        $stmt = $this->pdo->prepare('SELECT * FROM users WHERE username = ?');
+        $stmt->execute([$username]);
+        return $stmt->fetch();
+    }
 }
 ?>

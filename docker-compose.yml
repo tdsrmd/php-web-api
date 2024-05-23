@@ -1,0 +1,30 @@
+version: "2"
+
+services:
+  db:
+    image: mysql:latest
+    container_name: mysql_container2
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: akilli_kent
+      MYSQL_USER: sedat
+      MYSQL_PASSWORD: qweasd123
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql2
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin_container2
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+    driver: local
