@@ -21,7 +21,6 @@ function generate_jwt($user_id, $role) {
     );
 
     $jwt = JWT::encode($payload, $key, 'HS256');
-
     return $jwt;
 }
 
@@ -33,9 +32,7 @@ function validate_jwt($jwt) {
     }
 
     try {
-
         $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
-
         return (array) $decoded->data;
     } catch (Exception $e) {
 
