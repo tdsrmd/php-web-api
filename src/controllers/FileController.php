@@ -1,5 +1,5 @@
 <?php
-// src/controllers/FileController.php
+
 
 namespace App\Controllers;
 
@@ -15,43 +15,43 @@ class FileController {
     public function upload($files, $jwt) {
         $userData = validate_jwt($jwt);
         if (!$userData) {
-            return ['message' => 'Unauthorized'];
+            return ['error' => 'Unauthorized'];
         }
 
         if (!isset($files['file'])) {
-            return ['message' => 'No file uploaded'];
+            return ['error' => 'Dosya yüklenemedi'];
         }
 
         $file = $files['file'];
 
-        // Dosya tipi kontrolü
+
         if ($file['type'] !== 'application/pdf') {
-            return ['message' => 'Only PDF files are allowed'];
+            return ['error' => 'Sadece PDF dosyaları yüklenebilir'];
         }
 
-        // Kullanıcı ID'sine göre klasör oluşturma
+
         $userId = $userData['user_id'];
         $userDirectory = $this->uploadDirectory . $userId;
         if (!file_exists($userDirectory)) {
             mkdir($userDirectory, 0777, true);
         }
 
-        // Orijinal dosya adının ilk 6 harfi
+
         $originalFileName = pathinfo($file['name'], PATHINFO_FILENAME);
         $shortFileName = substr($originalFileName, 0, 6);
 
-        // Dosya adını oluşturma: ilk 6 harf + alt tire + tarih ve saat
+
         $newFileName = $shortFileName . '_' . date('YmdHis') . '.pdf';
         $targetPath = $userDirectory . '/' . $newFileName;
 
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-            // Veritabanına kaydetme
+
             $stmt = $this->pdo->prepare('INSERT INTO files (user_id, file_name) VALUES (?, ?)');
             $stmt->execute([$userId, $newFileName]);
 
-            return ['message' => 'File uploaded successfully', 'file' => $newFileName];
+            return ['message' => 'Dosya başarılı bir şekilde yüklendi.', 'file' => $newFileName];
         } else {
-            return ['message' => 'Failed to upload file'];
+            return ['message' => 'Dosya yüklenemedi.'];
         }
     }
 
@@ -63,17 +63,19 @@ class FileController {
 
         $userId = $userData['user_id'];
 
-        // Kullanıcının dosyalarını veritabanından çekme
-        $stmt = $this->pdo->prepare('SELECT file_name FROM files WHERE user_id = ?');
+
+        $stmt = $this->pdo->prepare('SELECT * FROM files WHERE user_id = ?');
         $stmt->execute([$userId]);
         $files = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        // Dosya URL'leri oluşturma
+
         $fileUrls = [];
         foreach ($files as $file) {
             $fileUrls[] = [
                 'file_name' => $file['file_name'],
-                'url' => 'http://localhost:8000/download/' . $userId . '/' . $file['file_name']
+                'status' => $file['status'],
+                'upload_time' => $file['upload_time'],
+                'url' => 'http://localhost:8000/download/' . $userId . '/' . $file['file_name'],
             ];
         }
 
@@ -82,10 +84,10 @@ class FileController {
 
     public function downloadFile($userId, $fileName) {
         $filePath = $this->uploadDirectory . $userId . '/' . $fileName;
-        error_log("Attempting to download file from path: $filePath");
+
 
         if (file_exists($filePath)) {
-            error_log("File found: $filePath");
+
             header('Content-Description: File Transfer');
             header('Content-Type: application/pdf');
             header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
@@ -96,7 +98,7 @@ class FileController {
             readfile($filePath);
             exit;
         } else {
-            error_log("File not found at path: $filePath");
+
             header('HTTP/1.1 404 Not Found');
             echo json_encode(['message' => 'File not found']);
         }

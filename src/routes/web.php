@@ -1,5 +1,5 @@
 <?php
-// src/routes/web.php
+
 
 use App\Controllers\UserController;
 use App\Controllers\FileController;
@@ -14,7 +14,7 @@ $adminController = new AdminController($pdo);
 
 require_once __DIR__ . '/../helpers/jwt_helper.php';
 
-// CORS başlıklarını ayarlama
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
@@ -71,6 +71,12 @@ $router->map('POST', '/admin/status', function() use ($adminController) {
     $fileId = $data['file_id'];
     $status = $data['status'];
     $response = $adminController->updateFileStatus($fileId, $status);
+    echo json_encode($response);
+});
+
+$router->map('GET', '/admin/listUsers', function() use ($adminController) {
+    header('Content-Type: application/json');
+    $response = $adminController->listAllUsers();
     echo json_encode($response);
 });
 
