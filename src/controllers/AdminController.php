@@ -10,7 +10,7 @@ class AdminController {
     }
 
     public function listAllFiles() {
-        // Dosyaları ve kullanıcı bilgilerini birleştiren SQL sorgusu
+
         $stmt = $this->pdo->prepare('
             SELECT
                 files.id AS file_id,
@@ -33,7 +33,7 @@ class AdminController {
     }
 
     public function updateFileStatus($fileId, $status) {
-        // Dosyanın durumunu güncelleyen SQL sorgusu
+
         $stmt = $this->pdo->prepare('UPDATE files SET status = ? WHERE id = ?');
         $stmt->execute([$status, $fileId]);
 
@@ -42,6 +42,15 @@ class AdminController {
         } else {
             return ['message' => 'Dosya statüsü güncellenirken bir hata oluştu'];
         }
+    }
+
+    public function listAllUsers(){
+
+        $stmt = $this->pdo->prepare('SELECT * FROM users');
+        $stmt->execute();
+        $users = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return ['users' => $users];
     }
 }
 ?>

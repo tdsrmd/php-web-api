@@ -1,5 +1,5 @@
 <?php
-// src/database/migrations/create_files_table.php
+
 
 $pdo = require __DIR__ . '/../../config/database.php';
 

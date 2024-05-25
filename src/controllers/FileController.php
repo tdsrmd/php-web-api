@@ -1,5 +1,5 @@
 <?php
-// src/controllers/FileController.php
+
 
 namespace App\Controllers;
 
@@ -24,28 +24,28 @@ class FileController {
 
         $file = $files['file'];
 
-        // Dosya tipi kontrolü
+
         if ($file['type'] !== 'application/pdf') {
             return ['message' => 'Only PDF files are allowed'];
         }
 
-        // Kullanıcı ID'sine göre klasör oluşturma
+
         $userId = $userData['user_id'];
         $userDirectory = $this->uploadDirectory . $userId;
         if (!file_exists($userDirectory)) {
             mkdir($userDirectory, 0777, true);
         }
 
-        // Orijinal dosya adının ilk 6 harfi
+
         $originalFileName = pathinfo($file['name'], PATHINFO_FILENAME);
         $shortFileName = substr($originalFileName, 0, 6);
 
-        // Dosya adını oluşturma: ilk 6 harf + alt tire + tarih ve saat
+
         $newFileName = $shortFileName . '_' . date('YmdHis') . '.pdf';
         $targetPath = $userDirectory . '/' . $newFileName;
 
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-            // Veritabanına kaydetme
+
             $stmt = $this->pdo->prepare('INSERT INTO files (user_id, file_name) VALUES (?, ?)');
             $stmt->execute([$userId, $newFileName]);
 
@@ -63,17 +63,19 @@ class FileController {
 
         $userId = $userData['user_id'];
 
-        // Kullanıcının dosyalarını veritabanından çekme
-        $stmt = $this->pdo->prepare('SELECT file_name FROM files WHERE user_id = ?');
+
+        $stmt = $this->pdo->prepare('SELECT * FROM files WHERE user_id = ?');
         $stmt->execute([$userId]);
         $files = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        // Dosya URL'leri oluşturma
+
         $fileUrls = [];
         foreach ($files as $file) {
             $fileUrls[] = [
                 'file_name' => $file['file_name'],
-                'url' => 'http://localhost:8000/download/' . $userId . '/' . $file['file_name']
+                'status' => $file['status'],
+                'upload_time' => $file['upload_time'],
+                'url' => 'http://localhost:8000/download/' . $userId . '/' . $file['file_name'],
             ];
         }
 

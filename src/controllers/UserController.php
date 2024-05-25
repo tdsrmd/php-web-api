@@ -1,5 +1,5 @@
 <?php
-// src/controllers/UserController.php
+
 
 namespace App\Controllers;
 
@@ -19,17 +19,17 @@ class UserController {
         $gender = $data['gender'];
         $password = $data['password'];
         $confirmPassword = $data['confirmPassword'];
-        $role = isset($data['role']) ? $data['role'] : 'user';  // Varsayılan rol 'user'
+        $role = isset($data['role']) ? $data['role'] : 'user';
 
-        // Şifreler eşleşiyor mu kontrolü
+
         if ($password !== $confirmPassword) {
             return ['message' => 'Parolalar eşleşmiyor.'];
         }
 
-        // Şifreyi hash'le
+
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-        // Kullanıcıyı veritabanına ekle
+
         try {
             $this->userModel->create($username, $email, $gender, $hashed_password, $role);
             $user_id = $this->userModel->findByEmail($email)['id'];
