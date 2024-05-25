@@ -8,6 +8,7 @@ $sql = "CREATE TABLE IF NOT EXISTS files (
     user_id INT NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     upload_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     FOREIGN KEY (user_id) REFERENCES users(id)
 )  ENGINE=INNODB;";
 

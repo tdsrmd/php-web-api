@@ -15,18 +15,18 @@ class FileController {
     public function upload($files, $jwt) {
         $userData = validate_jwt($jwt);
         if (!$userData) {
-            return ['error' => 'Unauthorized'];
+            return ['message' => 'Unauthorized'];
         }
 
         if (!isset($files['file'])) {
-            return ['error' => 'Dosya mevcut değil'];
+            return ['message' => 'No file uploaded'];
         }
 
         $file = $files['file'];
 
         // Dosya tipi kontrolü
         if ($file['type'] !== 'application/pdf') {
-            return ['error' => 'Sadece PDF dosyaları yüklenebilir'];
+            return ['message' => 'Only PDF files are allowed'];
         }
 
         // Kullanıcı ID'sine göre klasör oluşturma
@@ -49,9 +49,9 @@ class FileController {
             $stmt = $this->pdo->prepare('INSERT INTO files (user_id, file_name) VALUES (?, ?)');
             $stmt->execute([$userId, $newFileName]);
 
-            return ['message' => 'Dosya başarılı bir şekilde yüklendi', 'file' => $newFileName];
+            return ['message' => 'File uploaded successfully', 'file' => $newFileName];
         } else {
-            return ['message' => 'Dosya yüklenirken bir hata oluştu.Lütfen tekrar deneyin.'];
+            return ['message' => 'Failed to upload file'];
         }
     }
 
@@ -64,7 +64,7 @@ class FileController {
         $userId = $userData['user_id'];
 
         // Kullanıcının dosyalarını veritabanından çekme
-        $stmt = $this->pdo->prepare('SELECT file_name, upload_time,id FROM files WHERE user_id = ?');
+        $stmt = $this->pdo->prepare('SELECT file_name FROM files WHERE user_id = ?');
         $stmt->execute([$userId]);
         $files = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -72,10 +72,8 @@ class FileController {
         $fileUrls = [];
         foreach ($files as $file) {
             $fileUrls[] = [
-                'id' => $file['id'],
                 'file_name' => $file['file_name'],
-                'url' => 'http://localhost:8000/download/' . $userId . '/' . $file['file_name'],
-                'upload_time' => $file['upload_time'],
+                'url' => 'http://localhost:8000/download/' . $userId . '/' . $file['file_name']
             ];
         }
 
@@ -87,6 +85,7 @@ class FileController {
         error_log("Attempting to download file from path: $filePath");
 
         if (file_exists($filePath)) {
+            error_log("File found: $filePath");
             header('Content-Description: File Transfer');
             header('Content-Type: application/pdf');
             header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
