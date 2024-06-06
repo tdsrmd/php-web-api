@@ -1,9 +1,9 @@
 <?php
 
 $host = '127.0.0.1';
-$db   = 'akilli_kent';
-$user = 'sedat';
-$pass = 'qweasd123';
+$db   = 'db';
+$user = 'user';
+$pass = 'pass';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
